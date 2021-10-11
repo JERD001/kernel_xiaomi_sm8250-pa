@@ -5,6 +5,7 @@
 
 #define pr_fmt(fmt) "simple_lmk: " fmt
 
+#include <linux/delay.h>
 #include <linux/kthread.h>
 #include <linux/mm.h>
 #include <linux/moduleparam.h>
@@ -255,8 +256,23 @@ static int simple_lmk_reclaim_thread(void *data)
 
 	while (1) {
 		wait_event(oom_waitq, atomic_read(&needs_reclaim));
+<<<<<<< HEAD
 		scan_and_kill(MIN_FREE_PAGES);
 		atomic_set_release(&needs_reclaim, 0);
+=======
+
+		/*
+		 * Kill a batch of processes and wait for their memory to be
+		 * freed. After their memory is freed, sleep for 20 ms to give
+		 * OOM'd allocations a chance to scavenge for the newly-freed
+		 * pages. Rinse and repeat while there are still OOM'd
+		 * allocations.
+		 */
+		do {
+			scan_and_kill(MIN_FREE_PAGES);
+			msleep(20);
+		} while (atomic_read(&needs_reclaim));
+>>>>>>> parent of 690084ccb612 (simple_lmk: Make reclaim deterministic)
 	}
 
 	return 0;
@@ -264,9 +280,22 @@ static int simple_lmk_reclaim_thread(void *data)
 
 void simple_lmk_decide_reclaim(int kswapd_priority)
 {
+<<<<<<< HEAD
 	if (kswapd_priority == CONFIG_ANDROID_SIMPLE_LMK_AGGRESSION &&
 	    !atomic_cmpxchg_acquire(&needs_reclaim, 0, 1))
 		wake_up(&oom_waitq);
+=======
+	if (kswapd_priority != CONFIG_ANDROID_SIMPLE_LMK_AGGRESSION)
+		return;
+
+	if (!atomic_cmpxchg(&needs_reclaim, 0, 1))
+		wake_up(&oom_waitq);
+}
+
+void simple_lmk_stop_reclaim(void)
+{
+	atomic_set(&needs_reclaim, 0);
+>>>>>>> parent of 690084ccb612 (simple_lmk: Make reclaim deterministic)
 }
 
 void simple_lmk_mm_freed(struct mm_struct *mm)
