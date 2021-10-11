@@ -54,6 +54,7 @@ config ANDROID_BINDER_IPC_SELFTEST
 	  exhaustively with combinations of various buffer sizes and
 	  alignments.
 
+<<<<<<< HEAD
 config ANDROID_SIMPLE_LMK
 	bool "Simple Android Low Memory Killer"
 	depends on !ANDROID_LOW_MEMORY_KILLER && !MEMCG && !PSI
@@ -109,6 +110,8 @@ config ANDROID_SIMPLE_LMK_TIMEOUT_MSEC
 
 endif
 
+=======
+>>>>>>> parent of e116d3398d22 (simple_lmk: Introduce Simple Low Memory Killer for Android)
 endif # if ANDROID
 
 endmenu
