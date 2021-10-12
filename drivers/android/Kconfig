@@ -67,6 +67,4 @@ config ANDROID_SIMPLE_LMK
 
 endif
 
-endif # if ANDROID
-
 endmenu
