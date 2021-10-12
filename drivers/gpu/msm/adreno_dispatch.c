@@ -1431,10 +1431,6 @@ int adreno_dispatcher_queue_cmds(struct kgsl_device_private *dev_priv,
 
 	spin_unlock(&drawctxt->lock);
 
-	if (device->pwrctrl.l2pc_update_queue)
-		kgsl_pwrctrl_update_l2pc(&adreno_dev->dev,
-				KGSL_L2PC_QUEUE_TIMEOUT);
-
 	/* Add the context to the dispatcher pending list */
 	dispatcher_queue_context(adreno_dev, drawctxt);
 
@@ -2877,9 +2873,7 @@ int adreno_dispatcher_idle(struct adreno_device *adreno_dev)
 	 * Ensure that this function is not called when dispatcher
 	 * mutex is held and device is started
 	 */
-	if (mutex_is_locked(&dispatcher->mutex) &&
-		(__mutex_owner(&dispatcher->mutex) == current))
-		return -EDEADLK;
+	if (mutex_is_locked(&dispatcher->mutex))
 
 	adreno_get_gpu_halt(adreno_dev);
 

@@ -355,7 +355,7 @@ struct bias_config {
 	int	bias_kohms;
 };
 
-static int fg_gen4_debug_mask = FG_STATUS | FG_FVSS | FG_POWER_SUPPLY;
+static int fg_gen4_debug_mask = 0;
 
 static bool is_batt_vendor_gyb;
 static bool is_batt_vendor_nvt;
@@ -5614,7 +5614,7 @@ static int fg_awake_cb(struct votable *votable, void *data, int awake,
 	struct fg_dev *fg = data;
 
 	if (awake)
-		pm_stay_awake(fg->dev);
+		pm_wakeup_event(fg->dev, 500);
 	else
 		pm_relax(fg->dev);
 

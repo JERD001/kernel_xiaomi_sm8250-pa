@@ -3,7 +3,7 @@
  * Copyright (c) 2016-2020, The Linux Foundation. All rights reserved.
  */
 
-#ifndef __WALT_H
+
 #define __WALT_H
 
 #ifdef CONFIG_SCHED_WALT
@@ -20,8 +20,8 @@
  */
 #define DEFAULT_SCHED_RAVG_WINDOW (3333333 * 6)
 #else
-/* Default window size (in ns) = 20ms */
-#define DEFAULT_SCHED_RAVG_WINDOW 20000000
+/* Default window size (in ns) = 10ms */
+#define DEFAULT_SCHED_RAVG_WINDOW 10000000
 #endif
 
 /* Max window size (in ns) = 1s */
@@ -342,7 +342,6 @@ static inline unsigned int walt_nr_rtg_high_prio(int cpu)
 	return cpu_rq(cpu)->walt_stats.nr_rtg_high_prio_tasks;
 }
 
-
 extern bool is_rtgb_active(void);
 extern u64 get_rtgb_active_time(void);
 #define SCHED_PRINT(arg)        printk_deferred("%s=%llu", #arg, arg)
@@ -469,7 +468,7 @@ static inline bool prefer_spread_on_idle(int cpu, bool new_ilb)
 
 #else /* CONFIG_SCHED_WALT */
 
-static inline bool prefer_spread_on_idle(int cpu)
+static inline bool prefer_spread_on_idle(int cpu, bool new_lib)
 {
 	return false;
 }
@@ -567,6 +566,5 @@ static inline unsigned int walt_nr_rtg_high_prio(int cpu)
 {
 	return 0;
 }
-#endif /* CONFIG_SCHED_WALT */
 
 #endif

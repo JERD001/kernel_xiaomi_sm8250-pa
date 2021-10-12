@@ -285,6 +285,12 @@ static void do_idle(void)
 	 * polling needs to be visible before doing these things.
 	 */
 	smp_mb__after_atomic();
+	
+	/*
+	 * RCU relies on this call to be done outside of an RCU read-side
+	 * critical section.
+	 */
+	flush_smp_call_function_from_idle();
 
 	sched_ttwu_pending();
 	schedule_idle();

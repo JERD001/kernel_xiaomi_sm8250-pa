@@ -5112,12 +5112,15 @@ int kgsl_request_irq(struct platform_device *pdev, const  char *name,
 		irq_handler_t handler, void *data)
 {
 	int ret, num = platform_get_irq_byname(pdev, name);
+	unsigned long irqflags = IRQF_TRIGGER_HIGH;
 
 	if (num < 0)
 		return num;
 
-	ret = devm_request_irq(&pdev->dev, num, handler, IRQF_TRIGGER_HIGH |
-			       IRQF_PERF_AFFINE, name, data);
+	if (!strcmp(name, "kgsl_3d0_irq"))
+		irqflags |= IRQF_PERF_AFFINE;
+
+	ret = devm_request_irq(&pdev->dev, num, handler, irqflags, name, data);
 
 	if (ret)
 		dev_err(&pdev->dev, "Unable to get interrupt %s: %d\n",
@@ -5238,19 +5241,6 @@ int kgsl_device_platform_probe(struct kgsl_device *device)
 				PM_QOS_CPU_DMA_LATENCY,
 				PM_QOS_DEFAULT_VALUE);
 
-	if (device->pwrctrl.l2pc_cpus_mask) {
-		struct pm_qos_request *qos = &device->pwrctrl.l2pc_cpus_qos;
-
-		qos->type = PM_QOS_REQ_AFFINE_CORES;
-
-		atomic_set(&device->pwrctrl.l2pc_cpus_qos.cpus_affine,
-			   device->pwrctrl.l2pc_cpus_mask);
-
-		pm_qos_add_request(&device->pwrctrl.l2pc_cpus_qos,
-				PM_QOS_CPU_DMA_LATENCY,
-				PM_QOS_DEFAULT_VALUE);
-	}
-
 	device->events_wq = alloc_workqueue("kgsl-events",
 		WQ_UNBOUND | WQ_MEM_RECLAIM | WQ_SYSFS | WQ_HIGHPRI, 0);
 
@@ -5287,8 +5277,6 @@ void kgsl_device_platform_remove(struct kgsl_device *device)
 	kgsl_pwrctrl_uninit_sysfs(device);
 
 	pm_qos_remove_request(&device->pwrctrl.pm_qos_req_dma);
-	if (device->pwrctrl.l2pc_cpus_mask)
-		pm_qos_remove_request(&device->pwrctrl.l2pc_cpus_qos);
 
 	idr_destroy(&device->context_idr);
 
@@ -5422,7 +5410,7 @@ static int __init kgsl_core_init(void)
 		goto err;
 	}
 
-	sched_setscheduler(kgsl_driver.worker_thread, SCHED_FIFO, &param);
+	sched_setscheduler(kgsl_driver.worker_thread, SCHED_RR, &param);
 
 	kgsl_events_init();
 

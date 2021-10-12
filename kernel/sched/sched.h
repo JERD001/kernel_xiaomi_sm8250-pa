@@ -566,6 +566,8 @@ struct cfs_rq {
 	unsigned long		runnable_weight;
 	unsigned int		nr_running;
 	unsigned int		h_nr_running;
+	/* h_nr_running for SCHED_IDLE tasks */
+	unsigned int		idle_h_nr_running;
 
 	u64			exec_clock;
 	u64			min_vruntime;
@@ -1584,11 +1586,13 @@ static inline void unregister_sched_domain_sysctl(void)
 }
 #endif
 
-#else
+extern void flush_smp_call_function_from_idle(void);
 
+#else /* !CONFIG_SMP: */
+static inline void flush_smp_call_function_from_idle(void) { }
 static inline void sched_ttwu_pending(void) { }
 
-#endif /* CONFIG_SMP */
+#endif
 
 #include "stats.h"
 #include "autogroup.h"
@@ -1771,7 +1775,8 @@ static inline int task_on_rq_migrating(struct task_struct *p)
  */
 #define WF_SYNC			0x01		/* Waker goes to sleep after wakeup */
 #define WF_FORK			0x02		/* Child wakeup after fork */
-#define WF_MIGRATED		0x4		/* Internal use, task got migrated */
+#define WF_MIGRATED	0x04		/* internal use, task got migrated */
+#define WF_ON_RQ	0x08		/* wakee is on_rq */
 
 /*
  * To aid in avoiding the subversion of "niceness" due to uneven distribution
@@ -3121,7 +3126,17 @@ task_in_cum_window_demand(struct rq *rq, struct task_struct *p)
 
 static inline bool hmp_capable(void) { return false; }
 static inline bool is_max_capacity_cpu(int cpu) { return true; }
-static inline bool is_min_capacity_cpu(int cpu) { return true; }
+static inline bool is_min_capacity_cpu(int cpu)
+{
+#ifdef CONFIG_SMP
+	int min_cpu = cpu_rq(cpu)->rd->min_cap_orig_cpu;
+
+	return unlikely(min_cpu == -1) ||
+		capacity_orig_of(cpu) == capacity_orig_of(min_cpu);
+#else
+	return true;
+#endif
+}
 
 static inline int
 preferred_cluster(struct sched_cluster *cluster, struct task_struct *p)

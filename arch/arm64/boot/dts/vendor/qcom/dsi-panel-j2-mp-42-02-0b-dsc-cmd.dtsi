@@ -361,14 +361,14 @@
 	mi,mdss-dsi-panel-dc-update-flag;
 	mi,mdss-dsi-panel-dc-update-d2-index = <6>;
 
-	mi,mdss-panel-on-dimming-delay = <120>;
+	mi,mdss-panel-on-dimming-delay = <0>;
 
 	mi,mdss-dsi-panel-fod-dimlayer-enabled;
 	mi,mdss-panel-delay-after-fod-hbm-off;
 	mi,mdss-panel-delay-after-fod-hbm-on;
 
 	mi,mdss-dsi-dimlayer-brightness-alpha-lut-item-count = <21>;
-	mi,mdss-dsi-dimlayer-brightness-alpha-lut =
+	qcom,disp-fod-dim-lut =
 	/* brightness  alpha */
 		<0          0xFF
 		 4          0xEB
@@ -391,6 +391,8 @@
 		 1770       0x30
 		 2000       0x24
 		 2047       0x21>;
+		 
+	qcom,ulps-enabled;
 
 	qcom,mdss-dsi-display-timings {
 		timing@0{

@@ -22788,19 +22788,20 @@ static int msm_routing_put_stereo_to_custom_stereo_control(
 					goto skip_send_custom_stereo;
 				topo_id = adm_get_topology_for_port_copp_idx(
 					msm_bedais[be_index].port_id, idx);
-				if (topo_id < 0)
+				if (topo_id < 0) {
 					pr_debug("%s:Err:custom stereo topo %d",
 						 __func__, topo_id);
 					pr_debug("idx %d\n", idx);
-				if (topo_id == DS2_ADM_COPP_TOPOLOGY_ID)
+				}
+				if (topo_id == DS2_ADM_COPP_TOPOLOGY_ID) {
 					rc = msm_ds2_dap_set_custom_stereo_onoff
 						(msm_bedais[be_index].port_id,
 						idx, is_custom_stereo_on);
-				else if (topo_id == DOLBY_ADM_COPP_TOPOLOGY_ID)
+				} else if (topo_id == DOLBY_ADM_COPP_TOPOLOGY_ID) {
 					rc = dolby_dap_set_custom_stereo_onoff(
 						msm_bedais[be_index].port_id,
 						idx, is_custom_stereo_on);
-				else
+				} else {
 				rc = msm_qti_pp_send_stereo_to_custom_stereo_cmd
 						(msm_bedais[be_index].port_id,
 						idx, session_id,
@@ -22808,6 +22809,7 @@ static int msm_routing_put_stereo_to_custom_stereo_control(
 						op_FL_ip_FR_weight,
 						op_FR_ip_FL_weight,
 						op_FR_ip_FR_weight);
+				}
 				if (rc < 0)
 skip_send_custom_stereo:
 					pr_err("%s: err setting custom stereo\n",

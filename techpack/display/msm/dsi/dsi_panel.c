@@ -4787,7 +4787,7 @@ int dsi_panel_enable(struct dsi_panel *panel)
 		DSI_ERR("Invalid params\n");
 		return -EINVAL;
 	}
-
+	
 	mutex_lock(&panel->panel_lock);
 
 	mi_cfg = &panel->mi_cfg;
